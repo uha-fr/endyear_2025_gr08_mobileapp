@@ -1,8 +1,9 @@
-// lib/screens/products_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 import 'dart:convert' show utf8, base64;
+
+import 'product_detail_screen.dart'; 
 
 class ProductsScreen extends StatefulWidget {
   @override
@@ -12,8 +13,9 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   List<Map<String, String>> _products = [];
   bool _loading = true;
+
   final String apiUrl = 'http://localhost:8080/api/products';
-  final String apiKey = '749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT';
+  final String apiKey = '749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT'; 
 
   @override
   void initState() {
@@ -22,25 +24,40 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> fetchProducts() async {
-    final auth = 'Basic ${base64.encode(utf8.encode('$apiKey:'))}';
-    final res = await http.get(Uri.parse(apiUrl), headers: {'Authorization': auth});
+  final auth = 'Basic ${base64.encode(utf8.encode('$apiKey:'))}';
+  final res = await http.get(Uri.parse(apiUrl), headers: {'Authorization': auth});
 
-    if (res.statusCode == 200) {
-      final xmlDoc = XmlDocument.parse(res.body);
-      final products = xmlDoc.findAllElements('product');
+  if (res.statusCode == 200) {
+    final xmlDoc = XmlDocument.parse(res.body);
+    final productElements = xmlDoc.findAllElements('product');
 
-      setState(() {
-        _products = products.map((node) {
-          final id = node.getAttribute('id') ?? '';
-          final link = node.getAttribute('xlink:href') ?? '';
-          return {'id': id, 'link': link};
-        }).toList();
-        _loading = false;
-      });
-    } else {
-      throw Exception('Erreur Prestashop API : ${res.statusCode}');
-    }
+    final futures = productElements.map((product) async {
+      final id = product.getAttribute('id') ?? '';
+      final detailUrl = '$apiUrl/$id';
+
+      final detailRes = await http.get(Uri.parse(detailUrl), headers: {'Authorization': auth});
+      if (detailRes.statusCode == 200) {
+        final detailXml = XmlDocument.parse(detailRes.body);
+        final nameElement = detailXml.findAllElements('name').first;
+        final name = nameElement.findElements('language').first.text;
+
+        return {'id': id, 'name': name};
+      } else {
+        return null;
+      }
+    });
+
+    final results = await Future.wait(futures);
+
+    setState(() {
+      _products = results.whereType<Map<String, String>>().toList();
+      _loading = false;
+    });
+  } else {
+    throw Exception('Erreur API produits : ${res.statusCode}');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +65,25 @@ class _ProductsScreenState extends State<ProductsScreen> {
       appBar: AppBar(title: Text('Produits')),
       body: _loading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : ListView.builder( 
               itemCount: _products.length,
               itemBuilder: (context, index) {
                 final p = _products[index];
                 return ListTile(
-                  title: Text('Produit ID: ${p['id']}'),
-                  subtitle: Text(p['link'] ?? ''),
+                  title: Text(p['name'] ?? 'Sans nom'),
+                  subtitle: Text('ID: ${p['id']}'),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailScreen(
+                          id: p['id'] ?? '',
+                          name: p['name'] ?? '',
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
