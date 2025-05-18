@@ -7,48 +7,53 @@ import '../models/api_config.dart';
 
 import 'product_detail_screen.dart'; 
 
-class ProductsScreen extends StatefulWidget {
+class OrdersScreen extends StatefulWidget {
   @override
-  _ProductsScreenState createState() => _ProductsScreenState();
+  _OrdersScreenState createState() => _OrdersScreenState();
 }
 
-class _ProductsScreenState extends State<ProductsScreen> {
-  List<Map<String, String>> _products = [];
+class _OrdersScreenState extends State<OrdersScreen> 
+{
+  List<Map<String, String>> _orders = [];
   bool _loading = true;
+
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    fetchProducts(context);
+    fetchOrders(context);
   });
   }
 
-  Future<void> fetchProducts(BuildContext context) async 
+  Future<void> fetchOrders(BuildContext context) async 
   {
     final apiConfig = Provider.of<ApiConfig>(context, listen: false);
-    final apiKey =apiConfig.apiKey; //'749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT';
-    final apiUrl = '${apiConfig.apiUrl}/products'; //'http://localhost:8080/api/products';
+    final apiKey =apiConfig.apiKey; 
+    final apiUrl = '${apiConfig.apiUrl}/orders'; 
 
   final auth = 'Basic ${base64.encode(utf8.encode('$apiKey:'))}';
   final res = await http.get(Uri.parse(apiUrl), headers: {'Authorization': auth});
 
-  if (res.statusCode == 200) {
+  if (res.statusCode == 200) 
+  {
     final xmlDoc = XmlDocument.parse(res.body);
-    final productElements = xmlDoc.findAllElements('product');
+    final orderElements = xmlDoc.findAllElements('order');
 
-    final futures = productElements.map((product) async {
-      final id = product.getAttribute('id') ?? '';
+    final futures = orderElements.map((order) async 
+    {
+      final id = order.getAttribute('id') ?? '';
       final detailUrl = '$apiUrl/$id';
 
       final detailRes = await http.get(Uri.parse(detailUrl), headers: {'Authorization': auth});
-      if (detailRes.statusCode == 200) {
+      if (detailRes.statusCode == 200) 
+      {
         final detailXml = XmlDocument.parse(detailRes.body);
-        final nameElement = detailXml.findAllElements('name').first;
-        final name = nameElement.findElements('language').first.text;
+        final reference = detailXml.findAllElements('reference').first.text;
+        return {'id': id, 'name': reference};
 
-        return {'id': id, 'name': name};
-      } else {
+      } 
+      else {
         return null;
       }
     });
@@ -56,11 +61,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final results = await Future.wait(futures);
 
     setState(() {
-      _products = results.whereType<Map<String, String>>().toList();
+      _orders = results.whereType<Map<String, String>>().toList();
       _loading = false;
     });
   } else {
-    throw Exception('Erreur API produits : ${res.statusCode}');
+    throw Exception('Erreur API commandes : ${res.statusCode}');
   }
 }
 
@@ -68,27 +73,27 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Produits')),
+      appBar: AppBar(title: Text('Orders')),
       body: _loading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder( 
-              itemCount: _products.length,
+              itemCount: _orders.length,
               itemBuilder: (context, index) {
-                final p = _products[index];
+                final p = _orders[index];
                 return ListTile(
                   title: Text(p['name'] ?? 'Sans nom'),
                   subtitle: Text('ID: ${p['id']}'),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () { 
+                    /*Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ProductDetailScreen(
+                        builder: (context) => OrderDetailScreen(
                           id: p['id'] ?? '',
                           name: p['name'] ?? '',
                         ),
                       ),
-                    );
+                    );*/
                   },
                 );
               },

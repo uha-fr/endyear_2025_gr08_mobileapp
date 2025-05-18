@@ -2,9 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/api_config.dart';
 import 'package:provider/provider.dart';
-import 'home_screen.dart'; 
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart';
 import 'dart:convert' show utf8, base64;
 
 
@@ -36,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Accueil')),
+      appBar: AppBar(title: Text('Login')),
       body: Column(
         children: [
           TextField(
@@ -46,6 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           TextField(
               controller:_apikey,
+              obscureText: true,
               decoration: 
                     const InputDecoration(hintText: 'Enter your API Key'),
           ),
@@ -69,10 +68,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Provider.of<ApiConfig>(context, listen: false).update(apiKey, apiUrl);
 
                       // Redirige vers HomeScreen
-                      Navigator.pushReplacement(
+                     /* Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => HomeScreen()),
-                      );
+                      );*/
+                      Navigator.pushReplacementNamed(context, '/home');
                     } 
                     else  // Si erreur
                     {
@@ -86,19 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   }
 
-               /*   Provider.of<ApiConfig>(context, listen: false).update(
-                    _apikey.text,
-                    _apiUrl.text,
-                  );
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => HomeScreen(),
-                    ),
-                  );*/
                 }
             } , 
-            child:  const Text('Register'))
+            child:  const Text('Login'))
         ],
       )
     

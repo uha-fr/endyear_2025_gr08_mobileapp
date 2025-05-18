@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'models/api_config.dart';
 import 'screens/home_screen.dart';      
 import 'screens/login_screen.dart';      
-import 'screens/products_screen.dart';  
+import 'screens/products_screen.dart'; 
+import 'screens/mainScaffold.dart'; 
+ 
 
 void main() => runApp( 
   ChangeNotifierProvider(
@@ -14,7 +16,8 @@ void main() => runApp(
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return MaterialApp(
       title: 'Prestashop Manager',
       debugShowCheckedModeBanner: false,
@@ -22,9 +25,11 @@ class MyApp extends StatelessWidget {
       routes: 
       {
         '/': (context) => LoginScreen(),
-        '/home':(context) => HomeScreen(),
+        '/home': (context) => MainScaffold(),
+       // '/home':(context) => HomeScreen(),
         '/products': (context) => ProductsScreen(),
       },
+  
     );
   }
 }

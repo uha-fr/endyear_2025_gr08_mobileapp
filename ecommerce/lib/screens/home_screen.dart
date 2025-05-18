@@ -1,7 +1,5 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import '../models/api_config.dart';
-
 
 class HomeScreen extends StatefulWidget {
   
@@ -14,7 +12,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Accueil')),
+      appBar: AppBar(title: Text('Home')),
       body: 
         ListView(
           children: 
