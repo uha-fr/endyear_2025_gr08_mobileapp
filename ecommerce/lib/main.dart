@@ -1,9 +1,16 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'models/api_config.dart';
 import 'screens/home_screen.dart';      
+import 'screens/login_screen.dart';      
 import 'screens/products_screen.dart';  
 
-void main() => runApp(MyApp());
+void main() => runApp( 
+  ChangeNotifierProvider(
+      create: (_) => ApiConfig(),
+      child: MyApp(),
+    ),);
 
 class MyApp extends StatelessWidget {
   @override
@@ -14,7 +21,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: 
       {
-        '/': (context) => HomeScreen(),
+        '/': (context) => LoginScreen(),
+        '/home':(context) => HomeScreen(),
         '/products': (context) => ProductsScreen(),
       },
     );

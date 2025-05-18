@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 import 'dart:convert' show utf8, base64;
+import 'package:provider/provider.dart';
+import '../models/api_config.dart';
 
 import 'product_detail_screen.dart'; 
 
@@ -14,16 +16,24 @@ class _ProductsScreenState extends State<ProductsScreen> {
   List<Map<String, String>> _products = [];
   bool _loading = true;
 
-  final String apiUrl = 'http://localhost:8080/api/products';
-  final String apiKey = '749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT'; 
+  //final String apiUrl = 'http://localhost:8080/api/products';
+ // final String apiKey = '749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT'; 
 
   @override
   void initState() {
     super.initState();
-    fetchProducts();
+    //fetchProducts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    fetchProducts(context);
+  });
   }
 
-  Future<void> fetchProducts() async {
+  Future<void> fetchProducts(BuildContext context) async 
+  {
+    final apiConfig = Provider.of<ApiConfig>(context, listen: false);
+    final apiKey =apiConfig.apiKey; //'749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT';
+    final apiUrl = '${apiConfig.apiUrl}/products'; //'http://localhost:8080/api/products';
+
   final auth = 'Basic ${base64.encode(utf8.encode('$apiKey:'))}';
   final res = await http.get(Uri.parse(apiUrl), headers: {'Authorization': auth});
 
