@@ -27,8 +27,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Future<void> fetchProducts(BuildContext context) async 
   {
     final apiConfig = Provider.of<ApiConfig>(context, listen: false);
-    final apiKey =apiConfig.apiKey; //'749UUAHKQ8H6TTUBTYNXCJGSSKBWESBT';
-    final apiUrl = '${apiConfig.apiUrl}/products'; //'http://localhost:8080/api/products';
+    final apiKey =apiConfig.apiKey; 
+    final apiUrl = '${apiConfig.apiUrl}/products'; 
 
   final auth = 'Basic ${base64.encode(utf8.encode('$apiKey:'))}';
   final res = await http.get(Uri.parse(apiUrl), headers: {'Authorization': auth});

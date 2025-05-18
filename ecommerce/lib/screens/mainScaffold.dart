@@ -2,6 +2,7 @@ import 'package:ecommerce/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'products_screen.dart';
 import 'orders_screen.dart';
+import 'customers_screen.dart';
 
 
 class MainScaffold extends StatefulWidget {
@@ -16,6 +17,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     HomeScreen(), 
     ProductsScreen(),
     OrdersScreen(),
+    CustomersScreen(),
   ];
 
   @override
@@ -41,6 +43,10 @@ class _MainScaffoldState extends State<MainScaffold> {
            NavigationDestination(
             icon: Icon(Icons.move_to_inbox),
             label: 'Orders',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.move_to_inbox),
+            label: 'Customers',
           ),
         ],
       ),
