@@ -5,7 +5,7 @@ import 'dart:convert' show utf8, base64;
 import 'package:provider/provider.dart';
 import '../models/api_config.dart';
 
-import 'product_detail_screen.dart'; 
+import 'order_detail_screen.dart'; 
 
 class OrdersScreen extends StatefulWidget {
   @override
@@ -85,15 +85,14 @@ class _OrdersScreenState extends State<OrdersScreen>
                   subtitle: Text('ID: ${p['id']}'),
                   trailing: Icon(Icons.arrow_forward_ios),
                   onTap: () { 
-                    /*Navigator.push(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => OrderDetailScreen(
                           id: p['id'] ?? '',
-                          name: p['name'] ?? '',
                         ),
                       ),
-                    );*/
+                    );
                   },
                 );
               },
