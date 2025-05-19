@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'products_screen.dart';
 import 'orders_screen.dart';
 import 'customers_screen.dart';
+import 'tasks_screen.dart';
+
 
 
 class MainScaffold extends StatefulWidget {
@@ -18,6 +20,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     ProductsScreen(),
     OrdersScreen(),
     CustomersScreen(),
+    TaskScreen(),
   ];
 
   @override
@@ -45,8 +48,12 @@ class _MainScaffoldState extends State<MainScaffold> {
             label: 'Orders',
           ),
           NavigationDestination(
-            icon: Icon(Icons.move_to_inbox),
+            icon: Icon(Icons.people),
             label: 'Customers',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.task),
+            label: 'Tasks',
           ),
         ],
       ),
