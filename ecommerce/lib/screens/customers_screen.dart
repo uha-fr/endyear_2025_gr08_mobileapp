@@ -14,6 +14,7 @@ class CustomersScreen extends StatefulWidget {
 class _CustomersScreenState extends State<CustomersScreen> {
   bool _loading = true;
   List<Map<String, String>> _customers = [];
+  String? _error;
 
   @override
   void initState() {
@@ -28,16 +29,14 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
     try {
       final res = await http.get(Uri.parse(apiUrl), headers: {'Authorization': auth});
-      if (res.statusCode != 200) throw Exception("Erreur chargement clients");
+      if (res.statusCode != 200) throw Exception("Erreur lors du chargement des clients.");
 
       final doc = XmlDocument.parse(res.body);
       final elements = doc.findAllElements('customer');
 
-      // Récupérer détails clients
       final futures = elements.map((e) async {
         final id = e.getAttribute('id') ?? '';
         final detailUrl = '$apiUrl/$id';
-
         final detailRes = await http.get(Uri.parse(detailUrl), headers: {'Authorization': auth});
         if (detailRes.statusCode != 200) return null;
 
@@ -56,35 +55,62 @@ class _CustomersScreenState extends State<CustomersScreen> {
       });
     } catch (e) {
       print("Erreur : $e");
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _error = "Impossible de charger les clients.";
+      });
     }
+  }
+
+  Widget _buildCustomerCard(Map<String, String> customer) {
+    final initials = (customer['firstname']!.isNotEmpty ? customer['firstname']![0] : '') +
+        (customer['lastname']!.isNotEmpty ? customer['lastname']![0] : '');
+
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.indigo,
+          child: Text(initials.toUpperCase(), style: TextStyle(color: Colors.white)),
+        ),
+        title: Text('${customer['firstname']} ${customer['lastname']}',
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text('ID: ${customer['id']}'),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CustomerDetailScreen(id: customer['id']!),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Clients')),
+      appBar: AppBar(title: Text('Liste des Clients')),
       body: _loading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _customers.length,
-              itemBuilder: (context, index) {
-                final c = _customers[index];
-                return ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text('${c['firstname']} ${c['lastname']}'),
-                  subtitle: Text('ID: ${c['id']}'),
-                  onTap: () {
-                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CustomerDetailScreen(id: c['id']!),
+          : _error != null
+              ? Center(child: Text(_error!, style: TextStyle(color: Colors.red)))
+              : _customers.isEmpty
+                  ? Center(child: Text('Aucun client trouvé.'))
+                  : RefreshIndicator(
+                      onRefresh: _fetchCustomers,
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(top: 12),
+                        itemCount: _customers.length,
+                        itemBuilder: (context, index) {
+                          return _buildCustomerCard(_customers[index]);
+                        },
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
     );
   }
 }
