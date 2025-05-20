@@ -73,8 +73,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     } 
                     else  // Si erreur
                     {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Connexion refusée : ${response.statusCode}')),
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Connexion refusée : ${response.statusCode}'
+                            +' url: ${testUrl}'
+                            )
+                          ),
                       );
                     }
                   } catch (e) {
