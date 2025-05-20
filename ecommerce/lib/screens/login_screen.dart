@@ -77,12 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     else  // Si erreur
                     {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Connexion refusée : clé/API incorrects')),
+                        SnackBar(content: Text('Connexion refusée : clé/API incorrects.'+'${response.statusCode}')),
                       );
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur lors de la connexion à l’API')),
+                      SnackBar(content: Text('Erreur lors de la connexion à l’API'+'${e.toString()}')),
                     );
                   }
 
