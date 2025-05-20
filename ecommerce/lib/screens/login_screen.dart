@@ -40,13 +40,13 @@ class _LoginScreenState extends State<LoginScreen> {
           TextField(
               controller: _apiUrl,
               decoration: 
-                    const InputDecoration(hintText: 'Enter your API Url'),
+                    const InputDecoration(hintText: 'Enter your prestashop Url (Eg : https://myshop.com)'),
           ),
           TextField(
               controller:_apikey,
               obscureText: true,
               decoration: 
-                    const InputDecoration(hintText: 'Enter your API Key'),
+                    const InputDecoration(hintText: 'Enter your API Key (Eg : 176383FGD79847497DD29)'),
           ),
           TextButton(
             onPressed: () async
@@ -68,16 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       Provider.of<ApiConfig>(context, listen: false).update(apiKey, apiUrl);
 
                       // Redirige vers HomeScreen
-                     /* Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => HomeScreen()),
-                      );*/
+               
                       Navigator.pushReplacementNamed(context, '/home');
                     } 
                     else  // Si erreur
                     {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Connexion refusée : clé/API incorrects.'+'${response.statusCode}')),
+                        SnackBar(content: Text('Connexion refusée : ${response.statusCode}')),
                       );
                     }
                   } catch (e) {
