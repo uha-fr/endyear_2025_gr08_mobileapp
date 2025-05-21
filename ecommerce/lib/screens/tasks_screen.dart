@@ -132,7 +132,7 @@ class _TaskScreenState extends State<TaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Liste des tâches")),
+      appBar: AppBar(title: const Text("📋 Tâches")),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(

@@ -12,17 +12,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Home')),
-      body: 
-        ListView(
-          children: 
-          [
-            ListTile(
-              title: Text("Voir les produits"),
-              onTap: () => Navigator.pushNamed(context, '/products'),
-            ),
-          ],
-        ),
+      appBar: AppBar(title: Text('🏠 Home')),
+      body: null
     );
   }
 }

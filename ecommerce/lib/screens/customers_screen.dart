@@ -78,9 +78,6 @@ class _CustomersScreenState extends State<CustomersScreen> {
   }
 
 
-
-
-
   Widget _buildCustomerCard(Map<String, String> customer) {
     final initials = (customer['firstname']!.isNotEmpty ? customer['firstname']![0] : '') +
         (customer['lastname']!.isNotEmpty ? customer['lastname']![0] : '');
@@ -113,7 +110,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(title: Text('Liste des Clients')),
+    appBar: AppBar(title: Text('📁 Clients')),
     body: _loading
       ? Center(child: CircularProgressIndicator())
       : _error != null
