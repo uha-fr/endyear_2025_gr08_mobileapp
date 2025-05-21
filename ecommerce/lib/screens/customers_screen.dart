@@ -14,6 +14,8 @@ class CustomersScreen extends StatefulWidget {
 class _CustomersScreenState extends State<CustomersScreen> {
   bool _loading = true;
   List<Map<String, String>> _customers = [];
+  List<Map<String, String>> _filteredCustomers = [];
+  String _searchQuery = '';
   String? _error;
 
   @override
@@ -51,6 +53,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
       final results = await Future.wait(futures);
       setState(() {
         _customers = results.whereType<Map<String, String>>().toList();
+        _filteredCustomers = _customers;
         _loading = false;
       });
     } catch (e) {
@@ -61,6 +64,22 @@ class _CustomersScreenState extends State<CustomersScreen> {
       });
     }
   }
+
+  void _filterCustomers(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase();
+      _filteredCustomers = _customers.where((customer) {
+        final id = customer['id']?.toLowerCase() ?? '';
+        final firstName = customer['firstname']?.toLowerCase() ?? '';
+        final lastName = customer['lastname']?.toLowerCase() ?? '';
+        return id.contains(_searchQuery) || firstName.contains(_searchQuery) || lastName.contains(_searchQuery);
+      }).toList();
+    });
+  }
+
+
+
+
 
   Widget _buildCustomerCard(Map<String, String> customer) {
     final initials = (customer['firstname']!.isNotEmpty ? customer['firstname']![0] : '') +
@@ -91,26 +110,49 @@ class _CustomersScreenState extends State<CustomersScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Liste des Clients')),
-      body: _loading
-          ? Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!, style: TextStyle(color: Colors.red)))
-              : _customers.isEmpty
-                  ? Center(child: Text('Aucun client trouvé.'))
-                  : RefreshIndicator(
-                      onRefresh: _fetchCustomers,
-                      child: ListView.builder(
-                        padding: EdgeInsets.only(top: 12),
-                        itemCount: _customers.length,
-                        itemBuilder: (context, index) {
-                          return _buildCustomerCard(_customers[index]);
-                        },
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: Text('Liste des Clients')),
+    body: _loading
+      ? Center(child: CircularProgressIndicator())
+      : _error != null
+          ? Center(child: Text(_error!, style: TextStyle(color: Colors.red)))
+          : _customers.isEmpty
+              ? Center(child: Text('Aucun client trouvé.'))
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: TextField(
+                        onChanged: _filterCustomers,
+                        decoration: InputDecoration(
+                          hintText: 'Rechercher par nom ou ID...',
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                        ),
                       ),
                     ),
-    );
-  }
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _fetchCustomers,
+                        child: ListView.builder(
+                          padding: EdgeInsets.only(top: 12),
+                          itemCount: _filteredCustomers.length,
+                          itemBuilder: (context, index) {
+                            return _buildCustomerCard(_filteredCustomers[index]);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+  );
+}
+
 }
