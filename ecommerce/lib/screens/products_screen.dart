@@ -13,7 +13,26 @@ class ProductsScreen extends StatefulWidget {
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
-  List<Map<String, dynamic>> _products = [];
+
+  void _filterProducts(String query) {
+    setState(() {
+      _filteredProducts = _products.where((product) {
+        final name = (product['name'] ?? '').toLowerCase();
+        final id = (product['id'] ?? '').toLowerCase();
+        final q = query.toLowerCase();
+
+        return name.contains(q) || id.contains(q);
+      }).toList();
+    });
+  }
+
+
+  //List<Map<String, dynamic>> _products = [];
+    List<Map<String, dynamic>> _products = [];
+    List<Map<String, dynamic>> _filteredProducts = [];
+
+
+
   bool _loading = true;
 
   @override
@@ -47,6 +66,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
           final nameElement = detailXml.findAllElements('name').first;
           final name = nameElement.findElements('language').first.text;
 
+
+
+
           // récupération image
           final imageElement = detailXml.findAllElements('id_default_image').firstOrNull;
           Uint8List? imageBytes;
@@ -76,10 +98,16 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
       final results = await Future.wait(futures);
 
+      final products = results.whereType<Map<String, dynamic>>().toList();
       setState(() {
-        _products = results.whereType<Map<String, dynamic>>().toList();
+         _products = products;
+        _filteredProducts = products;
         _loading = false;
+        //_products = results.whereType<Map<String, dynamic>>().toList();
+        //_loading = false;
       });
+
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors du chargement des produits')),
@@ -92,6 +120,76 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('🛒 Produits')),
+      body: _loading
+    ? const Center(child: CircularProgressIndicator())
+    : Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              onChanged: _filterProducts,
+              decoration: InputDecoration(
+                hintText: 'Rechercher un produit...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+            ),
+          ),
+          Expanded(
+            child: _filteredProducts.isEmpty
+                ? const Center(child: Text('Aucun produit trouvé.', style: TextStyle(fontSize: 18)))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = _filteredProducts[index];
+                      final imageBytes = product['image'] as Uint8List?;
+
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          leading: CircleAvatar(
+                            radius: 26,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: imageBytes != null ? MemoryImage(imageBytes) : null,
+                            child: imageBytes == null
+                                ? const Icon(Icons.image_not_supported, color: Colors.grey)
+                                : null,
+                          ),
+                          title: Text(
+                            product['name'] ?? 'Sans nom',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          subtitle: Text('ID: ${product['id']}'),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailScreen(
+                                  id: product['id'] ?? '',
+                                  name: product['name'] ?? '',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+
+      /*
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _products.isEmpty
@@ -137,7 +235,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       ),
                     );
                   },
-                ),
+                ),*/
     );
   }
 }
