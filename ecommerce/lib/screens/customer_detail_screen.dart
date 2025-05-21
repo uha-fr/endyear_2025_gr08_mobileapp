@@ -70,14 +70,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
       final results = await Future.wait(futures);
 
-      setState(() 
-      {
+      setState(() {
         _customer = {'firstname': firstname, 'lastname': lastname, 'email': email};
         _orders = results.whereType<Map<String, String>>().toList();
         _loading = false;
       });
-    } 
-    catch (e) {
+    } catch (e) {
       print("Erreur: $e");
       setState(() => _loading = false);
     }
@@ -85,37 +83,50 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final fullName = '${_customer['firstname'] ?? ''} ${_customer['lastname'] ?? ''}';
+
     return Scaffold(
       appBar: AppBar(title: Text('Client #${widget.id}')),
       body: _loading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Informations Client', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Divider(),
+                  const Text('📋 Informations Client', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Divider(),
                   _infoRow('Prénom', _customer['firstname']),
                   _infoRow('Nom', _customer['lastname']),
                   _infoRow('Email', _customer['email']),
-                  SizedBox(height: 24),
-                  Text('Commandes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Divider(),
-                  ..._orders.map((o) => ListTile(
-                        leading: Icon(Icons.receipt),
-                        title: Text('Commande #${o['id']}'),
-                        subtitle: Text('Réf: ${o['reference']} | ${o['date']}'),
-                        trailing: Text('${o['total']} €'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => OrderDetailScreen(id: o['id']!),
-                            ),
-                          );
-                        },
-                      )),
+                  const SizedBox(height: 24),
+                  const Text('🧾 Commandes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Divider(),
+                  if (_orders.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: Text('Aucune commande', style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+                    )
+                  else
+                    ..._orders.map((o) => Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: const Icon(Icons.receipt_long, color: Colors.blue),
+                            title: Text('Commande #${o['id']}'),
+                            subtitle: Text('Réf: ${o['reference']} • ${o['date']}'),
+                            trailing: Text('${o['total']} €', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OrderDetailScreen(id: o['id']!),
+                                ),
+                              );
+                            },
+                          ),
+                        )),
                 ],
               ),
             ),
@@ -124,11 +135,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
   Widget _infoRow(String label, String? value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Text('$label: ', style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value ?? '')),
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(value ?? '', style: const TextStyle(fontSize: 16))),
         ],
       ),
     );

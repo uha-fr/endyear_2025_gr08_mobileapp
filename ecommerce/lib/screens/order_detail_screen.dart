@@ -101,6 +101,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,32 +113,53 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('ID', _order['id']),
-                  _infoRow('Référence', _order['reference']),
-                  _infoRow('Livraison', _order['delivery']),
-                  _infoRow('Client', _order['customer']),
-                  _infoRow('Total TTC', '${_order['total']} €'),
-                  _infoRow('Paiement', _order['payment']),
-                  _infoRow('État', _order['state']),
-                  _infoRow('Date', _order['date']),
+                  Text('📁 Fiche commande',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 12),
+                  Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _infoRow(Icons.confirmation_number, 'Référence', _order['reference']),
+                          _infoRow(Icons.assignment, 'Client', _order['customer']),
+                          _infoRow(Icons.location_on, 'Adresse', _order['delivery']),
+                          _infoRow(Icons.payment, 'Paiement', _order['payment']),
+                          _infoRow(Icons.euro, 'Total TTC', '${_order['total']} €'),
+                          _infoRow(Icons.flag, 'État', _order['state']),
+                          _infoRow(Icons.calendar_today, 'Date', _order['date']),
+                        ],
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 24),
-                  Text('Produits', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('🛒 Produits',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   Divider(),
-                  ..._products.map((p) => ListTile(
-                        title: Text(p['name'] ?? ''),
-                        subtitle: Text('Quantité: ${p['quantity']}'),
-                        trailing: Text('${p['price']} €'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailScreen(
-                                id: p['id'] ?? '',
-                                name: p['name'] ?? '',
+                  ..._products.map((p) => Card(
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: ListTile(
+                          leading: Icon(Icons.shopping_bag, color: Colors.blue),
+                          title: Text(p['name'] ?? ''),
+                          subtitle: Text('Quantité: ${p['quantity']}'),
+                          trailing: Text('${p['price']} €'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailScreen(
+                                  id: p['id'] ?? '',
+                                  name: p['name'] ?? '',
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ))
                 ],
               ),
@@ -145,13 +167,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _infoRow(String label, String? value) {
+  Widget _infoRow(IconData icon, String label, String? value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Text('$label: ', style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value ?? '')),
+          Icon(icon, color: Colors.blue),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '$label:',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(value ?? '', style: TextStyle(color: Colors.black87)),
+          ),
         ],
       ),
     );
