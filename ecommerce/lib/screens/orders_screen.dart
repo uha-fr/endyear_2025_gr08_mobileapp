@@ -15,6 +15,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<Map<String, String>> _orders = [];
   bool _loading = true;
 
+  List<Map<String, String>> _filteredOrders = [];
+  String _searchQuery = '';
+
+  void _filterOrders(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase();
+      _filteredOrders = _orders.where((order) {
+        final id = (order['id'] ?? '').toLowerCase();
+        final name = (order['name'] ?? '').toLowerCase();
+        return id.contains(_searchQuery) || name.contains(_searchQuery);
+      }).toList();
+    });
+  }
+
+
+
   @override
   void initState() {
     super.initState();
@@ -69,8 +85,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
       });
 
       final results = await Future.wait(futures);
+      final validOrders = results.whereType<Map<String, String>>().toList();
+
       setState(() {
-        _orders = results.whereType<Map<String, String>>().toList();
+       // _orders = results.whereType<Map<String, String>>().toList();
+        _orders = validOrders;
+        _filteredOrders = validOrders;
         _loading = false;
       });
     } else {
@@ -104,7 +124,80 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('📦 Commandes')),
-      body: _loading
+
+    body: _loading
+    ? const Center(child: CircularProgressIndicator())
+    : Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              onChanged: _filterOrders,
+              decoration: InputDecoration(
+                hintText: 'Rechercher par ID ou référence...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+            ),
+          ),
+          Expanded(
+            child: _filteredOrders.isEmpty
+                ? const Center(child: Text('Aucune commande trouvée.', style: TextStyle(fontSize: 18)))
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _filteredOrders.length,
+                    itemBuilder: (context, index) {
+                      final order = _filteredOrders[index];
+                      final statusLabel = order['statusName'] ?? 'Inconnu';
+                      final statusColor = getStatusColor(statusLabel);
+                      final date = formatDate(order['date'] ?? '');
+
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          leading: CircleAvatar(
+                            backgroundColor: statusColor,
+                            child: Text(
+                              statusLabel[0].toUpperCase(),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          title: Text(
+                            'Commande #${order['name']}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          subtitle: Text('Statut: $statusLabel\nDate: $date'),
+                          isThreeLine: true,
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderDetailScreen(
+                                  id: order['id'] ?? '',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+
+
+
+     /* body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _orders.isEmpty
               ? const Center(child: Text('Aucune commande trouvée.', style: TextStyle(fontSize: 18)))
@@ -150,7 +243,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
                     );
                   },
-                ),
+                ),*/
     );
   }
 }
