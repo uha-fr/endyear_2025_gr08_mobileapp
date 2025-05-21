@@ -83,26 +83,78 @@ class _LowStockScreenState extends State<LowStockScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Produits en faible stock")),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _products.isEmpty
-              ? const Center(child: Text("Aucun produit en faible stock"))
-              : ListView.builder(
-                  itemCount: _products.length,
-                  itemBuilder: (context, index) {
-                    final product = _products[index];
-                    return ListTile(
-                      title: Text(product['name'] ?? ''),
-                      subtitle: Text("Stock actuel : ${product['quantity']}"),
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text("🧯 Faible stock"),
+      centerTitle: true,
+    ),
+    body: _loading
+        ? const Center(child: CircularProgressIndicator())
+        : _products.isEmpty
+            ? const Center(child: Text("Aucun produit à faible stock 🎉"))
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _products.length,
+                itemBuilder: (context, index) {
+                  final product = _products[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.red.shade100,
+                        child: Icon(Icons.warning_amber_rounded, color: Colors.red.shade800),
+                      ),
+                      title: Text(
+                        product['name'] ?? '',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          "Stock actuel : ${product['quantity']}",
+                          style: TextStyle(color: Colors.grey.shade700),
+                        ),
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          "${product['quantity']}",
+                          style: TextStyle(
+                            color: Colors.orange.shade800,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(id: product['id']!, name: product['name']!)));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProductDetailScreen(
+                              id: product['id']!,
+                              name: product['name']!,
+                            ),
+                          ),
+                        );
                       },
-                    );
-                  },
-                ),
-    );
-  }
+                    ),
+                  );
+                },
+              ),
+  );
+}
+
 }

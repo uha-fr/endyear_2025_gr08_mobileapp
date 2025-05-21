@@ -75,60 +75,79 @@ class _OrdersToShipScreenState extends State<OrdersToShipScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Commandes à expédier")),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.separated(
-              itemCount: _orders.length,
-              padding: const EdgeInsets.all(16),
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final order = _orders[index];
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              OrderDetailScreen(id: order['id'] ?? ''),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text("🚚 Commandes à expédier"),
+      centerTitle: true,
+    ),
+    body: _loading
+        ? const Center(child: CircularProgressIndicator())
+        : _orders.isEmpty
+            ? const Center(child: Text("Aucune commande à expédier 📭"))
+            : ListView.separated(
+                itemCount: _orders.length,
+                padding: const EdgeInsets.all(16),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final order = _orders[index];
+                  return Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
+                      tileColor: Theme.of(context).cardColor,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                OrderDetailScreen(id: order['id'] ?? ''),
+                          ),
+                        );
+                      },
+                      title: Text(
+                        "Commande #${order['id']}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Commande #${order['id']}",
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text("Client: ${order['customer']}"),
-                          Text("Date: ${order['date']}"),
-                          Text("Total: ${order['total']} €"),
+                          const SizedBox(height: 6),
+                          Text("📋 Client : ${order['customer']}"),
+                          Text("📅 Date : ${order['date']}"),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              "💶 ${order['total']} €",
+                              style: TextStyle(
+                                color: Colors.green.shade800,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
                     ),
-                  ),
-                );
-              },
-            ),
-    );
-  }
+                  );
+                },
+              ),
+  );
+}
+
 }

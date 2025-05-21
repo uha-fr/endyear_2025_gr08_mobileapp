@@ -132,7 +132,10 @@ class _TaskScreenState extends State<TaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("📋 Tâches")),
+      appBar: AppBar(
+        title: const Text("📋 Tâches"),
+        elevation: 0,
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -142,6 +145,8 @@ class _TaskScreenState extends State<TaskScreen> {
                   title: 'Préparer les commandes',
                   subtitle: 'Préparez les commandes payées pour un retrait ou une expédition.',
                   badgeCount: ordersToPrepareCount ?? 0,
+                  icon: Icons.inventory_2_outlined,
+                  color: Colors.blue,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -149,11 +154,12 @@ class _TaskScreenState extends State<TaskScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 12),
                 TaskItem(
                   title: 'Commandes à expédier',
-                  subtitle: 'Expédiez les commandes préparées',
+                  subtitle: 'Expédiez les commandes préparées.',
                   badgeCount: ordersToShipCount ?? 0,
+                  icon: Icons.local_shipping_outlined,
+                  color: Colors.green,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -161,11 +167,12 @@ class _TaskScreenState extends State<TaskScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 12),
                 TaskItem(
                   title: 'Produits à réapprovisionner',
-                  subtitle: 'Consultez les produits à faible stock et réapprovisionnez-les si nécessaire.',
+                  subtitle: 'Consultez les produits à faible stock.',
                   badgeCount: lowStockCount ?? 0,
+                  icon: Icons.warning_amber_rounded,
+                  color: Colors.orange,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -184,69 +191,74 @@ class TaskItem extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final int badgeCount;
+  final IconData icon;
+  final Color color;
 
   const TaskItem({
     required this.title,
     required this.subtitle,
     required this.onTap,
     required this.badgeCount,
+    required this.icon,
+    required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        splashColor: Theme.of(context).primaryColor.withOpacity(0.2),
-        highlightColor: Theme.of(context).primaryColor.withOpacity(0.05),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text(subtitle, style: const TextStyle(fontSize: 14)),
-                  ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.1),
+              child: Icon(icon, color: color),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                ],
+              ),
+            ),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                badgeCount.toString(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: color,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  badgeCount.toString(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade800,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
