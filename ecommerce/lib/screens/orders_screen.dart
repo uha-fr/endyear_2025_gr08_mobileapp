@@ -21,21 +21,40 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<String> _statusLabels = ['Tous'];
   String _selectedStatus = 'Tous';
 
+  String _sortOrder = 'desc';
+
+
+    void _sortFilteredOrders() {
+  _filteredOrders.sort((a, b) {
+    final dateA = DateTime.tryParse(a['date'] ?? '') ?? DateTime(0);
+    final dateB = DateTime.tryParse(b['date'] ?? '') ?? DateTime(0);
+    return _sortOrder == 'asc'
+        ? dateA.compareTo(dateB)
+        : dateB.compareTo(dateA);
+    });
+  }
+
+
+
   void _filterOrders(String query) {
-  setState(() {
-    _filteredOrders = _orders.where((order) {
-      final id = (order['id'] ?? '').toLowerCase();
-      final reference = (order['name'] ?? '').toLowerCase();
-      final status = (order['statusName'] ?? 'Inconnu').toLowerCase();
-      final q = query.toLowerCase();
+    setState(() {
+      _filteredOrders = _orders.where((order) {
+        final id = (order['id'] ?? '').toLowerCase();
+        final reference = (order['name'] ?? '').toLowerCase();
+        final status = (order['statusName'] ?? 'Inconnu').toLowerCase();
+        final q = query.toLowerCase();
 
-      final matchesQuery = id.contains(q) || reference.contains(q);
-      final matchesStatus = _selectedStatus == 'Tous' || status == _selectedStatus.toLowerCase();
+        final matchesQuery = id.contains(q) || reference.contains(q);
+        final matchesStatus = _selectedStatus == 'Tous' || status == _selectedStatus.toLowerCase();
 
-      return matchesQuery && matchesStatus;
-    }).toList();
-  });
-}
+        return matchesQuery && matchesStatus;
+      }).toList();
+
+      _sortFilteredOrders();
+    });
+  }
+
+
 
 
   @override
@@ -168,7 +187,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   onChanged: (value) {
                     setState(() {
                       _selectedStatus = value!;
-                      _filterOrders(''); // re-filtre
+                      _filterOrders('');
                     });
                   },
                   items: _statusLabels.map((status) {
@@ -179,6 +198,34 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   }).toList(),
                   isExpanded: true,
                 ),
+
+                const SizedBox(height: 12),
+      Row(
+        children: [
+          const Text('Trier par date:'),
+          const SizedBox(width: 12),
+          DropdownButton<String>(
+            value: _sortOrder,
+            onChanged: (value) {
+              setState(() {
+                _sortOrder = value!;
+                _sortFilteredOrders();
+              });
+            },
+            items: const [
+              DropdownMenuItem(
+                value: 'desc',
+                child: Text('Plus récent en premier'),
+              ),
+              DropdownMenuItem(
+                value: 'asc',
+                child: Text('Plus ancien en premier'),
+              ),
+            ],
+          ),
+        ],
+      ),
+
               ],
             ),
           ),
