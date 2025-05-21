@@ -18,17 +18,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<Map<String, String>> _filteredOrders = [];
   String _searchQuery = '';
 
-  void _filterOrders(String query) {
-    setState(() {
-      _searchQuery = query.toLowerCase();
-      _filteredOrders = _orders.where((order) {
-        final id = (order['id'] ?? '').toLowerCase();
-        final name = (order['name'] ?? '').toLowerCase();
-        return id.contains(_searchQuery) || name.contains(_searchQuery);
-      }).toList();
-    });
-  }
+  List<String> _statusLabels = ['Tous'];
+  String _selectedStatus = 'Tous';
 
+  void _filterOrders(String query) {
+  setState(() {
+    _filteredOrders = _orders.where((order) {
+      final id = (order['id'] ?? '').toLowerCase();
+      final reference = (order['name'] ?? '').toLowerCase();
+      final status = (order['statusName'] ?? 'Inconnu').toLowerCase();
+      final q = query.toLowerCase();
+
+      final matchesQuery = id.contains(q) || reference.contains(q);
+      final matchesStatus = _selectedStatus == 'Tous' || status == _selectedStatus.toLowerCase();
+
+      return matchesQuery && matchesStatus;
+    }).toList();
+  });
+}
 
 
   @override
@@ -87,10 +94,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
       final results = await Future.wait(futures);
       final validOrders = results.whereType<Map<String, String>>().toList();
 
+      final statusSet = <String>{'Tous'};
+      for (var order in results.whereType<Map<String, String>>()) {
+        final status = order['statusName'] ?? 'Inconnu';
+        statusSet.add(status);
+      }
+
+
       setState(() {
-       // _orders = results.whereType<Map<String, String>>().toList();
-        _orders = validOrders;
+         _orders = results.whereType<Map<String, String>>().toList();
+        //_orders = validOrders;
         _filteredOrders = validOrders;
+          _statusLabels = statusSet.toList();
         _loading = false;
       });
     } else {
@@ -125,24 +140,46 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('📦 Commandes')),
 
-    body: _loading
+
+      body: _loading
     ? const Center(child: CircularProgressIndicator())
     : Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
-            child: TextField(
-              onChanged: _filterOrders,
-              decoration: InputDecoration(
-                hintText: 'Rechercher par ID ou référence...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+            child: Column(
+              children: [
+                TextField(
+                  onChanged: _filterOrders,
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher une commande...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
+                const SizedBox(height: 12),
+                DropdownButton<String>(
+                  value: _selectedStatus,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value!;
+                      _filterOrders(''); // re-filtre
+                    });
+                  },
+                  items: _statusLabels.map((status) {
+                    return DropdownMenuItem(
+                      value: status,
+                      child: Text(status == 'Tous' ? 'Tous les statuts' : status),
+                    );
+                  }).toList(),
+                  isExpanded: true,
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -196,54 +233,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
       ),
 
 
-
-     /* body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _orders.isEmpty
-              ? const Center(child: Text('Aucune commande trouvée.', style: TextStyle(fontSize: 18)))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _orders.length,
-                  itemBuilder: (context, index) {
-                    final order = _orders[index];
-                    final statusLabel = order['statusName'] ?? 'Inconnu';
-                    final statusColor = getStatusColor(statusLabel);
-                    final date = formatDate(order['date'] ?? '');
-
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        leading: CircleAvatar(
-                          backgroundColor: statusColor,
-                          child: Text(
-                            statusLabel[0].toUpperCase(),
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        title: Text(
-                          'Commande #${order['name']}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        subtitle: Text('Statut: $statusLabel\nDate: $date'),
-                        isThreeLine: true,
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OrderDetailScreen(
-                                id: order['id'] ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),*/
     );
   }
 }
