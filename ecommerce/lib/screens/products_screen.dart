@@ -14,26 +14,32 @@ class ProductsScreen extends StatefulWidget {
 
 class _ProductsScreenState extends State<ProductsScreen> {
 
-  void _filterProducts(String query) {
-    setState(() {
-      _filteredProducts = _products.where((product) {
-        final name = (product['name'] ?? '').toLowerCase();
-        final id = (product['id'] ?? '').toLowerCase();
-        final q = query.toLowerCase();
+void _filterProducts(String query) {
+  setState(() {
+    _filteredProducts = _products.where((product) {
+      final name = (product['name'] ?? '').toLowerCase();
+      final id = (product['id'] ?? '').toLowerCase();
+      final category = product['category'] ?? '';
+      final q = query.toLowerCase();
 
-        return name.contains(q) || id.contains(q);
-      }).toList();
-    });
-  }
+      final matchesQuery = name.contains(q) || id.contains(q);
+      final matchesCategory = _selectedCategory == 'Toutes' || category == _selectedCategory;
+
+      return matchesQuery && matchesCategory;
+    }).toList();
+  });
+}
+
 
 
   //List<Map<String, dynamic>> _products = [];
     List<Map<String, dynamic>> _products = [];
     List<Map<String, dynamic>> _filteredProducts = [];
 
+    bool _loading = true;
+    String _selectedCategory = 'Toutes';
+    List<String> _categories = ['Toutes'];
 
-
-  bool _loading = true;
 
   @override
   void initState() {
@@ -66,7 +72,28 @@ class _ProductsScreenState extends State<ProductsScreen> {
           final nameElement = detailXml.findAllElements('name').first;
           final name = nameElement.findElements('language').first.text;
 
+          //final categoryElement = detailXml.findAllElements('id_category_default').firstOrNull;
+          //final category = categoryElement?.text ?? 'Inconnue';
 
+          final categoryElement = detailXml.findAllElements('id_category_default').firstOrNull;
+          final categoryId = categoryElement?.text;
+          String categoryName = 'Inconnue';
+
+          if (categoryId != null && categoryId.isNotEmpty) {
+            final categoryUrl = '$baseApiUrl/categories/$categoryId';
+            final categoryRes = await http.get(Uri.parse(categoryUrl), headers: {'Authorization': authHeader});
+
+            if (categoryRes.statusCode == 200) {
+              final categoryXml = XmlDocument.parse(categoryRes.body);
+              final nameElement = categoryXml.findAllElements('name').firstOrNull;
+              if (nameElement != null) {
+                final langElement = nameElement.findElements('language').firstOrNull;
+                if (langElement != null) {
+                  categoryName = langElement.text;
+                }
+              }
+            }
+          }
 
 
           // récupération image
@@ -90,6 +117,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             'id': id,
             'name': name,
             'image': imageBytes,
+            'category': categoryName,
           };
         } else {
           return null;
@@ -99,9 +127,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
       final results = await Future.wait(futures);
 
       final products = results.whereType<Map<String, dynamic>>().toList();
+
+      final categories = <String>{'Toutes'};
+      for (var p in products) {
+        final cat = p['category'] ?? 'Inconnue';
+        categories.add(cat);
+      }
+
+
       setState(() {
          _products = products;
         _filteredProducts = products;
+        _categories = categories.toList();
         _loading = false;
         //_products = results.whereType<Map<String, dynamic>>().toList();
         //_loading = false;
@@ -124,7 +161,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     ? const Center(child: CircularProgressIndicator())
     : Column(
         children: [
-          Padding(
+         /* Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
               onChanged: _filterProducts,
@@ -139,7 +176,45 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 fillColor: Colors.grey[200],
               ),
             ),
+          ),*/
+         Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                TextField(
+                  onChanged: _filterProducts,
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher un produit...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButton<String>(
+                  value: _selectedCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategory = value!;
+                      _filterProducts(''); // applique à nouveau le filtre
+                    });
+                  },
+                  items: _categories.map((cat) {
+                    return DropdownMenuItem(
+                      value: cat,
+                      child: Text(cat == 'Toutes' ? 'Toutes les catégories' : 'Catégorie $cat'),
+                    );
+                  }).toList(),
+                  isExpanded: true,
+                ),
+              ],
+            ),
           ),
+
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(child: Text('Aucun produit trouvé.', style: TextStyle(fontSize: 18)))
