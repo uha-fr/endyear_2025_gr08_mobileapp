@@ -161,60 +161,49 @@ void _filterProducts(String query) {
     ? const Center(child: CircularProgressIndicator())
     : Column(
         children: [
-         /* Padding(
-            padding: const EdgeInsets.all(12),
-            child: TextField(
-              onChanged: _filterProducts,
-              decoration: InputDecoration(
-                hintText: 'Rechercher un produit...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
-            ),
-          ),*/
-         Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                TextField(
-                  onChanged: _filterProducts,
-                  decoration: InputDecoration(
-                    hintText: 'Rechercher un produit...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButton<String>(
-                  value: _selectedCategory,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCategory = value!;
-                      _filterProducts(''); // applique à nouveau le filtre
-                    });
-                  },
-                  items: _categories.map((cat) {
-                    return DropdownMenuItem(
-                      value: cat,
-                      child: Text(cat == 'Toutes' ? 'Toutes les catégories' : 'Catégorie $cat'),
-                    );
-                  }).toList(),
-                  isExpanded: true,
-                ),
-              ],
-            ),
+          Padding(
+  padding: const EdgeInsets.all(12),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TextField(
+        onChanged: _filterProducts,
+        decoration: InputDecoration(
+          hintText: 'Rechercher un produit...',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
-
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+      ),
+      const SizedBox(height: 12),
+      DropdownButtonFormField<String>(
+        value: _selectedCategory,
+        onChanged: (value) {
+          setState(() {
+            _selectedCategory = value!;
+            _filterProducts('');
+          });
+        },
+        items: _categories.map((cat) {
+          return DropdownMenuItem(
+            value: cat,
+            child: Text(cat == 'Toutes' ? 'Toutes les catégories' : 'Catégorie $cat'),
+          );
+        }).toList(),
+        decoration: InputDecoration(
+          labelText: 'Filtrer par catégorie',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        isExpanded: true,
+      ),
+    ],
+  ),
+),
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(child: Text('Aucun produit trouvé.', style: TextStyle(fontSize: 18)))
@@ -263,54 +252,6 @@ void _filterProducts(String query) {
           ),
         ],
       ),
-
-      /*
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _products.isEmpty
-              ? const Center(child: Text('Aucun produit trouvé.', style: TextStyle(fontSize: 18)))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _products.length,
-                  itemBuilder: (context, index) {
-                    final product = _products[index];
-                    final imageBytes = product['image'] as Uint8List?;
-
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        leading: CircleAvatar(
-                          radius: 26,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: imageBytes != null ? MemoryImage(imageBytes) : null,
-                          child: imageBytes == null
-                              ? const Icon(Icons.image_not_supported, color: Colors.grey)
-                              : null,
-                        ),
-                        title: Text(
-                          product['name'] ?? 'Sans nom',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        subtitle: Text('ID: ${product['id']}'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailScreen(
-                                id: product['id'] ?? '',
-                                name: product['name'] ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),*/
     );
   }
 }

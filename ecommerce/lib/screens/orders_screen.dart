@@ -164,71 +164,74 @@ class _OrdersScreenState extends State<OrdersScreen> {
     ? const Center(child: CircularProgressIndicator())
     : Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                TextField(
-                  onChanged: _filterOrders,
-                  decoration: InputDecoration(
-                    hintText: 'Rechercher une commande...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButton<String>(
-                  value: _selectedStatus,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedStatus = value!;
-                      _filterOrders('');
-                    });
-                  },
-                  items: _statusLabels.map((status) {
-                    return DropdownMenuItem(
-                      value: status,
-                      child: Text(status == 'Tous' ? 'Tous les statuts' : status),
-                    );
-                  }).toList(),
-                  isExpanded: true,
-                ),
+         Padding(
+  padding: const EdgeInsets.all(12),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TextField(
+        onChanged: _filterOrders,
+        decoration: InputDecoration(
+          hintText: 'Rechercher une commande...',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+      ),
+      const SizedBox(height: 12),
 
-                const SizedBox(height: 12),
-      Row(
-        children: [
-          const Text('Trier par date:'),
-          const SizedBox(width: 12),
-          DropdownButton<String>(
-            value: _sortOrder,
-            onChanged: (value) {
-              setState(() {
-                _sortOrder = value!;
-                _sortFilteredOrders();
-              });
-            },
-            items: const [
-              DropdownMenuItem(
-                value: 'desc',
-                child: Text('Plus récent en premier'),
-              ),
-              DropdownMenuItem(
-                value: 'asc',
-                child: Text('Plus ancien en premier'),
-              ),
-            ],
+      DropdownButtonFormField<String>(
+        value: _selectedStatus,
+        onChanged: (value) {
+          setState(() {
+            _selectedStatus = value!;
+            _filterOrders('');
+          });
+        },
+        items: _statusLabels.map((status) {
+          return DropdownMenuItem(
+            value: status,
+            child: Text(status == 'Tous' ? 'Tous les statuts' : status),
+          );
+        }).toList(),
+        decoration: InputDecoration(
+          labelText: 'Filtrer par statut',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+      ),
+      const SizedBox(height: 12),
+      DropdownButtonFormField<String>(
+        value: _sortOrder,
+        onChanged: (value) {
+          setState(() {
+            _sortOrder = value!;
+            _sortFilteredOrders();
+          });
+        },
+        items: const [
+          DropdownMenuItem(
+            value: 'desc',
+            child: Text('Plus récent en premier'),
+          ),
+          DropdownMenuItem(
+            value: 'asc',
+            child: Text('Plus ancien en premier'),
           ),
         ],
+        decoration: InputDecoration(
+          labelText: 'Trier par date',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
       ),
-
-              ],
-            ),
-          ),
+    ],
+  ),
+),
           Expanded(
             child: _filteredOrders.isEmpty
                 ? const Center(child: Text('Aucune commande trouvée.', style: TextStyle(fontSize: 18)))
