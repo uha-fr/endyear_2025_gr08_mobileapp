@@ -240,7 +240,7 @@ void _filterProducts(String query) {
                               MaterialPageRoute(
                                 builder: (context) => ProductDetailScreen(
                                   id: product['id'] ?? '',
-                                  name: product['name'] ?? '',
+                                  //name: product['name'] ?? '',
                                 ),
                               ),
                             );

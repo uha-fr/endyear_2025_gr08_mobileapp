@@ -154,7 +154,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               MaterialPageRoute(
                                 builder: (context) => ProductDetailScreen(
                                   id: p['id'] ?? '',
-                                  name: p['name'] ?? '',
+                                 // name: p['name'] ?? '',
                                 ),
                               ),
                             );

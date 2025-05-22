@@ -145,7 +145,7 @@ Widget build(BuildContext context) {
                           MaterialPageRoute(
                             builder: (_) => ProductDetailScreen(
                               id: product['id']!,
-                              name: product['name']!,
+                             // name: product['name']!,
                             ),
                           ),
                         );
