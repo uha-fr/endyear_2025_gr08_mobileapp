@@ -88,7 +88,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       title: const Text("🧯 Faible stock"),
-      centerTitle: true,
+      centerTitle: false,
     ),
     body: _loading
         ? const Center(child: CircularProgressIndicator())

@@ -80,7 +80,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       title: const Text("📦 Commandes à préparer"),
-      centerTitle: true,
+      centerTitle: false,
     ),
     body: _loading
         ? const Center(child: CircularProgressIndicator())
@@ -134,7 +134,8 @@ Widget build(BuildContext context) {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              "💶 ${order['total']} €",
+                             // "💶 ${order['total']} €",
+                              "💶 ${double.parse(order['total'] ?? '0').toStringAsFixed(2)} €",
                               style: TextStyle(
                                 color: Colors.blue.shade800,
                                 fontWeight: FontWeight.bold,

@@ -142,8 +142,8 @@ class _TaskScreenState extends State<TaskScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 TaskItem(
-                  title: 'Préparer les commandes',
-                  subtitle: 'Préparez les commandes payées pour un retrait ou une expédition.',
+                  title: 'Commandes à préparer',
+                  subtitle: 'Préparez les commandes payées.',
                   badgeCount: ordersToPrepareCount ?? 0,
                   icon: Icons.inventory_2_outlined,
                   color: Colors.blue,

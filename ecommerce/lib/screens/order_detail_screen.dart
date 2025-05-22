@@ -127,7 +127,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           _infoRow(Icons.assignment, 'Client', _order['customer']),
                           _infoRow(Icons.location_on, 'Adresse', _order['delivery']),
                           _infoRow(Icons.payment, 'Paiement', _order['payment']),
-                          _infoRow(Icons.euro, 'Total TTC', '${_order['total']} €'),
+                          _infoRow(Icons.euro, 'Total TTC', '${double.parse(_order['total'] ?? '0').toStringAsFixed(2)} €'),
                           _infoRow(Icons.flag, 'État', _order['state']),
                           _infoRow(Icons.calendar_today, 'Date', _order['date']),
                         ],
@@ -147,7 +147,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           leading: Icon(Icons.shopping_bag, color: Colors.blue),
                           title: Text(p['name'] ?? ''),
                           subtitle: Text('Quantité: ${p['quantity']}'),
-                          trailing: Text('${p['price']} €'),
+                          trailing: Text('${double.parse(p['price'] ?? '0').toStringAsFixed(2)} €'),
                           onTap: () {
                             Navigator.push(
                               context,
