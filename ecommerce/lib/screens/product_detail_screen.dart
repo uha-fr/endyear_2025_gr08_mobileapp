@@ -34,7 +34,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final auth = 'Basic ${base64.encode(utf8.encode('${apiConfig.apiKey}:'))}';
 
     try {
-      // Récupération des infos produit
+      // === 1. Récupération des infos produit ===
       final productUrl = '${apiConfig.apiUrl}/products/${widget.id}';
       final productRes = await http.get(Uri.parse(productUrl), headers: {'Authorization': auth});
       if (productRes.statusCode != 200) throw Exception('Erreur chargement produit');
@@ -54,7 +54,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       final priceElem = productDoc.findAllElements('price').firstOrNull;
       if (priceElem != null) _price = priceElem.text;
 
-      // Nom de catégorie
+      // === 2. Nom de catégorie ===
       if (categoryId.isNotEmpty) {
         final categoryUrl = '${apiConfig.apiUrl}/categories/$categoryId';
         final catRes = await http.get(Uri.parse(categoryUrl), headers: {'Authorization': auth});
@@ -68,18 +68,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
       }
 
-      // Stock
-      final stockUrl = '${apiConfig.apiUrl}/stock_availables?filter[id_product]=[${widget.id}]';
-      final stockRes = await http.get(Uri.parse(stockUrl), headers: {'Authorization': auth});
-      if (stockRes.statusCode == 200) {
-        final stockDoc = XmlDocument.parse(stockRes.body);
-        final stockElem = stockDoc.findAllElements('stock_available').firstOrNull;
-        if (stockElem != null) {
-          _quantity = stockElem.getElement('quantity')?.text ?? '0';
+      // === 3. Récupération du stock total ===
+      final stockListUrl = '${apiConfig.apiUrl}/stock_availables?filter[id_product]=${widget.id}';
+      final stockListRes = await http.get(Uri.parse(stockListUrl), headers: {'Authorization': auth});
+
+      if (stockListRes.statusCode == 200) {
+        final stockListDoc = XmlDocument.parse(stockListRes.body);
+        final stockElems = stockListDoc.findAllElements('stock_available');
+
+        int totalQuantity = 0;
+
+        for (var stockRef in stockElems) {
+          final href = stockRef.getAttribute('xlink:href');
+          if (href != null) {
+            final stockDetailRes = await http.get(Uri.parse(href), headers: {'Authorization': auth});
+            if (stockDetailRes.statusCode == 200) {
+              final stockDetailDoc = XmlDocument.parse(stockDetailRes.body);
+              final stockElem = stockDetailDoc.findAllElements('stock_available').firstOrNull;
+              if (stockElem != null) {
+                final qtyText = stockElem.getElement('quantity')?.text ?? '0';
+                final qty = int.tryParse(qtyText) ?? 0;
+                totalQuantity += qty;
+              }
+            }
+          }
         }
+
+        _quantity = totalQuantity.toString();
       }
 
-      // Image
+      // === 4. Image produit ===
       final imageIdElem = productDoc.findAllElements('id_default_image').firstOrNull;
       if (imageIdElem != null) {
         final imageId = imageIdElem.text;
@@ -105,7 +123,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text(_loading ? 'Chargement...' : _name),
-        backgroundColor: Colors.teal,
+        //backgroundColor: Colors.teal,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

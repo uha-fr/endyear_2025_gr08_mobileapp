@@ -36,6 +36,61 @@ class _TaskScreenState extends State<TaskScreen> {
     setState(() => _loading = false);
   }
 
+
+  Future<void> _fetchLowStockCount() async {
+  try {
+    final apiConfig = Provider.of<ApiConfig>(context, listen: false);
+    final auth = 'Basic ${base64.encode(utf8.encode('${apiConfig.apiKey}:'))}';
+
+    // Récupère tous les IDs de produits
+    final productsRes = await http.get(
+      Uri.parse('${apiConfig.apiUrl}/products?display=[id]'),
+      headers: {'Authorization': auth},
+    );
+    if (productsRes.statusCode != 200) throw Exception('Erreur produits');
+
+    final productsDoc = XmlDocument.parse(productsRes.body);
+    final ids = productsDoc
+        .findAllElements('product')
+        .map((e) => e.getElement('id')?.text)
+        .whereType<String>()
+        .toList();
+
+    int totalLowStock = 0;
+
+    // Groupes de 100 produits max pour filtrer
+    const chunkSize = 100;
+    for (int i = 0; i < ids.length; i += chunkSize) {
+      final chunk = ids.skip(i).take(chunkSize).join(',');
+      final stockRes = await http.get(
+        Uri.parse('${apiConfig.apiUrl}/stock_availables?filter[id_product]=[$chunk]&display=[quantity,id_product_attribute]'),
+        headers: {'Authorization': auth},
+      );
+      if (stockRes.statusCode != 200) continue;
+
+      final stockDoc = XmlDocument.parse(stockRes.body);
+      final stockElements = stockDoc.findAllElements('stock_available');
+
+      for (var stock in stockElements) {
+        final attr = stock.getElement('id_product_attribute')?.text;
+        final qty = stock.getElement('quantity')?.text;
+
+        if (attr == '0') {
+          final quantity = int.tryParse(qty ?? '') ?? 0;
+          if (quantity < 15) totalLowStock++;
+        }
+      }
+    }
+
+    setState(() => lowStockCount = totalLowStock);
+  } catch (e) {
+    print('Erreur stock bas : $e');
+    setState(() => lowStockCount = 0);
+  }
+}
+
+
+  /*
   Future<void> _fetchLowStockCount() async {
     try {
       final apiConfig = Provider.of<ApiConfig>(context, listen: false);
@@ -73,7 +128,7 @@ class _TaskScreenState extends State<TaskScreen> {
       print('Erreur produits : $e');
       setState(() => lowStockCount = 0);
     }
-  }
+  }*/
 
   Future<void> _fetchOrdersToPrepareCount() async {
     try {
