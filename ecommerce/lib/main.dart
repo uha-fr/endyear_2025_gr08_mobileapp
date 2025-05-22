@@ -6,7 +6,9 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';      
 import 'screens/products_screen.dart'; 
 import 'screens/mainScaffold.dart'; 
- 
+import 'screens/tasks_screen.dart'; 
+import 'screens/orders_screen.dart';
+import 'screens/customers_screen.dart'; 
 
 void main() => runApp( 
   ChangeNotifierProvider(
@@ -27,6 +29,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => LoginScreen(),
         '/home': (context) => MainScaffold(),
         '/products': (context) => ProductsScreen(),
+        '/orders': (context) =>  OrdersScreen(),
+        '/clients': (context) =>  CustomersScreen(),
+        '/tasks': (context) =>  TaskScreen(),
       },
   
     );
