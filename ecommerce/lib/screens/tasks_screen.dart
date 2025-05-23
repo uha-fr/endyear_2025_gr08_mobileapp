@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/api_config.dart';
 import 'low_stock_screen.dart';
 
+
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
 
@@ -36,99 +37,71 @@ class _TaskScreenState extends State<TaskScreen> {
     setState(() => _loading = false);
   }
 
-
-  Future<void> _fetchLowStockCount() async {
+Future<void> _fetchLowStockCount() async {
   try {
     final apiConfig = Provider.of<ApiConfig>(context, listen: false);
     final auth = 'Basic ${base64.encode(utf8.encode('${apiConfig.apiKey}:'))}';
 
-    // Récupère tous les IDs de produits
     final productsRes = await http.get(
       Uri.parse('${apiConfig.apiUrl}/products?display=[id]'),
       headers: {'Authorization': auth},
     );
-    if (productsRes.statusCode != 200) throw Exception('Erreur produits');
+    if (productsRes.statusCode != 200) throw Exception('Erreur récupération produits');
 
     final productsDoc = XmlDocument.parse(productsRes.body);
-    final ids = productsDoc
+    final productIds = productsDoc
         .findAllElements('product')
         .map((e) => e.getElement('id')?.text)
         .whereType<String>()
         .toList();
 
-    int totalLowStock = 0;
+    print('Total produits trouvés : ${productIds.length}');
 
-    // Groupes de 100 produits max pour filtrer
-    const chunkSize = 100;
-    for (int i = 0; i < ids.length; i += chunkSize) {
-      final chunk = ids.skip(i).take(chunkSize).join(',');
+    int totalLowStock = 0;
+    const batchSize = 5;
+
+    //  récupérer le stock d'un produit
+    Future<int> fetchStockForProduct(String productId) async {
       final stockRes = await http.get(
-        Uri.parse('${apiConfig.apiUrl}/stock_availables?filter[id_product]=[$chunk]&display=[quantity,id_product_attribute]'),
+        Uri.parse('${apiConfig.apiUrl}/stock_availables?filter[id_product]=[$productId]&display=[quantity,id_product_attribute]'),
         headers: {'Authorization': auth},
       );
-      if (stockRes.statusCode != 200) continue;
+
+      if (stockRes.statusCode != 200) {
+        print('Erreur récupération stock produit $productId');
+        return 0;
+      }
 
       final stockDoc = XmlDocument.parse(stockRes.body);
       final stockElements = stockDoc.findAllElements('stock_available');
 
-      for (var stock in stockElements) {
-        final attr = stock.getElement('id_product_attribute')?.text;
-        final qty = stock.getElement('quantity')?.text;
+      int lowStockCount = 0;
+      for (final stock in stockElements) {
+        final attr = stock.getElement('id_product_attribute')?.text ?? 'null';
+        final qtyText = stock.getElement('quantity')?.text ?? 'null';
+        final quantity = int.tryParse(qtyText) ?? -1;
 
-        if (attr == '0') {
-          final quantity = int.tryParse(qty ?? '') ?? 0;
-          if (quantity < 15) totalLowStock++;
+        print('Produit $productId - Stock lu : attr=$attr, qty=$qtyText');
+
+        if (quantity >= 0 && quantity < 15 && attr == '0') {
+          lowStockCount++;
         }
       }
+      return lowStockCount;
+    }
+
+    for (int i = 0; i < productIds.length; i += batchSize) {
+      final batch = productIds.skip(i).take(batchSize).toList();
+      final results = await Future.wait(batch.map(fetchStockForProduct));
+      totalLowStock += results.fold(0, (a, b) => a + b);
     }
 
     setState(() => lowStockCount = totalLowStock);
   } catch (e) {
-    print('Erreur stock bas : $e');
+    print(' Erreur lors du comptage des stocks bas : $e');
     setState(() => lowStockCount = 0);
   }
 }
-
-
-  /*
-  Future<void> _fetchLowStockCount() async {
-    try {
-      final apiConfig = Provider.of<ApiConfig>(context, listen: false);
-      final auth = 'Basic ${base64.encode(utf8.encode('${apiConfig.apiKey}:'))}';
-      final apiUrl = '${apiConfig.apiUrl}/products';
-
-      final res = await http.get(Uri.parse(apiUrl), headers: {
-        'Authorization': auth,
-      });
-
-      if (res.statusCode != 200) throw Exception('Erreur chargement produits');
-
-      final doc = XmlDocument.parse(res.body);
-      final productIds = doc.findAllElements('product').map((e) => e.getAttribute('id')).whereType<String>().toList();
-
-      int count = 0;
-
-      final futures = productIds.map((id) async {
-        final detailUrl = '$apiUrl/$id';
-        final detailRes = await http.get(Uri.parse(detailUrl), headers: {'Authorization': auth});
-        if (detailRes.statusCode != 200) return;
-
-        final detailDoc = XmlDocument.parse(detailRes.body);
-        final stock = detailDoc.findAllElements('quantity').first.text;
-
-        if (int.tryParse(stock) != null && int.parse(stock) < 15) {
-          count++;
-        }
-      });
-
-      await Future.wait(futures);
-
-      setState(() => lowStockCount = count);
-    } catch (e) {
-      print('Erreur produits : $e');
-      setState(() => lowStockCount = 0);
-    }
-  }*/
 
   Future<void> _fetchOrdersToPrepareCount() async {
     try {
