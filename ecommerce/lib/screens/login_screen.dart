@@ -45,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'URL de PrestaShop',
                   hintText: 'https://myshop.com',
+                  hintStyle: TextStyle(color: Colors.grey.shade400),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   prefixIcon: Icon(Icons.link),
                 ),
@@ -57,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'Clé API',
                   hintText: '176383FGD79847497DD29',
+                  hintStyle: TextStyle(color: Colors.grey.shade400),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   prefixIcon: Icon(Icons.vpn_key),
                 ),

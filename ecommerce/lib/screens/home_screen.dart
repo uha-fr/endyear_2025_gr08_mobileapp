@@ -140,10 +140,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   spacing: 24,
                   runSpacing: 24,
                   children: [
-                    _statCard('Total Commandes', totalOrders.toString(), Colors.blue.shade100, Colors.blue),
-                    _statCard('Revenu Total', '${totalRevenue.toStringAsFixed(2)} €', Colors.green.shade100, Colors.green),
+                    _statCard('Commandes', totalOrders.toString(), Colors.blue.shade100, Colors.blue),
+                    _statCard('Revenu', '${totalRevenue.toStringAsFixed(0)} €', Colors.green.shade100, Colors.green),
                     _statCard('En rupture', outOfStockProducts.toString(), Colors.red.shade100, Colors.red),
-                    _statCard('Nombre de clients', totalCustomers.toString(), Colors.purple.shade100, Colors.purple),
+                    _statCard('Clients', totalCustomers.toString(), Colors.purple.shade100, Colors.purple),
                   ],
                 ),
               ),
@@ -176,8 +176,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _statCard(String title, String value, Color bgColor, Color textColor) {
     return SizedBox(
-      width: 180,
-      height: 120,
+      width: 140,
+      height: 100,
       child: Card(
         elevation: 4,
         color: bgColor,
@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Flexible(
                 child: Text(
                   title,
-                  style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -116,7 +116,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             leading: const Icon(Icons.receipt_long, color: Colors.blue),
                             title: Text('Commande #${o['id']}'),
                             subtitle: Text('Réf: ${o['reference']} • ${o['date']}'),
-                            trailing: Text('${o['total']} €', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            trailing: Text('${(double.tryParse(o['total'] ?? '0') ?? 0).toStringAsFixed(2)} €', style: const TextStyle(fontWeight: FontWeight.bold)),
                             onTap: () {
                               Navigator.push(
                                 context,
