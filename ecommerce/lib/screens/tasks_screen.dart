@@ -55,8 +55,6 @@ Future<void> _fetchLowStockCount() async {
         .whereType<String>()
         .toList();
 
-    print('Total produits trouvés : ${productIds.length}');
-
     int totalLowStock = 0;
     const batchSize = 5;
 
@@ -80,8 +78,6 @@ Future<void> _fetchLowStockCount() async {
         final attr = stock.getElement('id_product_attribute')?.text ?? 'null';
         final qtyText = stock.getElement('quantity')?.text ?? 'null';
         final quantity = int.tryParse(qtyText) ?? -1;
-
-        print('Produit $productId - Stock lu : attr=$attr, qty=$qtyText');
 
         if (quantity >= 0 && quantity < 15 && attr == '0') {
           lowStockCount++;
